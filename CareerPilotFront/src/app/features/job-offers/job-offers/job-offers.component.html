@@ -1,0 +1,685 @@
+<div class="app-layout">
+
+  <aside class="sidebar">
+
+    <div class="sidebar-brand">
+
+      <span class="brand-icon">
+        C
+      </span>
+
+      <div>
+        <strong>CareerPilot</strong>
+        <small>AI Career Manager</small>
+      </div>
+
+    </div>
+
+    <nav class="sidebar-nav">
+
+      <a
+        routerLink="/dashboard"
+        routerLinkActive="active"
+        class="nav-item"
+      >
+        <span>⌂</span>
+        Tableau de bord
+      </a>
+
+      <button
+        type="button"
+        class="nav-item"
+        disabled
+      >
+        <span>▦</span>
+        Kanban
+      </button>
+
+      <a
+        routerLink="/companies"
+        routerLinkActive="active"
+        class="nav-item"
+      >
+        <span>🏢</span>
+        Entreprises
+      </a>
+
+      <a
+        routerLink="/job-offers"
+        routerLinkActive="active"
+        class="nav-item"
+      >
+        <span>💼</span>
+        Offres d’emploi
+      </a>
+
+      <button
+        type="button"
+        class="nav-item"
+        disabled
+      >
+        <span>✦</span>
+        Assistant IA
+      </button>
+
+    </nav>
+
+    <div class="sidebar-footer">
+
+      <div class="sidebar-user">
+
+        <span class="user-avatar">
+          {{
+            user?.firstName
+              ?.charAt(0)
+              ?.toUpperCase()
+          }}
+        </span>
+
+        <div>
+          <strong>
+            {{ user?.firstName }}
+            {{ user?.lastName }}
+          </strong>
+
+          <small>
+            {{ user?.email }}
+          </small>
+        </div>
+
+      </div>
+
+      <button
+        type="button"
+        class="sidebar-logout"
+        (click)="logout()"
+      >
+        Déconnexion
+      </button>
+
+    </div>
+
+  </aside>
+
+  <main class="main-content">
+
+    <header class="topbar">
+
+      <div>
+        <span class="page-kicker">
+          Opportunités
+        </span>
+
+        <h1>
+          Offres d’emploi
+        </h1>
+
+        <p>
+          Centralisez les offres qui vous intéressent.
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="primary-button"
+        [disabled]="companies.length === 0"
+        (click)="openCreateForm()"
+      >
+        + Nouvelle offre
+      </button>
+
+    </header>
+
+    <div
+      *ngIf="
+        !loading
+        &&
+        companies.length === 0
+      "
+      class="alert alert-warning"
+    >
+      <span>
+        ⚠️ Ajoutez d’abord une entreprise avant de créer une offre.
+      </span>
+
+      <a routerLink="/companies">
+        Ajouter une entreprise
+      </a>
+    </div>
+
+    <div
+      *ngIf="errorMessage"
+      class="alert alert-error"
+    >
+      <span>
+        ⚠️ {{ errorMessage }}
+      </span>
+
+      <button
+        type="button"
+        (click)="errorMessage = ''"
+      >
+        ×
+      </button>
+    </div>
+
+    <div
+      *ngIf="successMessage"
+      class="alert alert-success"
+    >
+      <span>
+        ✓ {{ successMessage }}
+      </span>
+
+      <button
+        type="button"
+        (click)="successMessage = ''"
+      >
+        ×
+      </button>
+    </div>
+
+    <section
+      *ngIf="showForm"
+      class="form-panel"
+    >
+
+      <div class="form-panel-header">
+
+        <div>
+          <span class="page-kicker">
+            {{
+              editingId === null
+                ? 'Création'
+                : 'Modification'
+            }}
+          </span>
+
+          <h2>
+            {{
+              editingId === null
+                ? 'Ajouter une offre'
+                : 'Modifier l’offre'
+            }}
+          </h2>
+        </div>
+
+        <button
+          type="button"
+          class="close-button"
+          (click)="cancelForm()"
+        >
+          ×
+        </button>
+
+      </div>
+
+      <form
+        [formGroup]="offerForm"
+        (ngSubmit)="submit()"
+      >
+
+        <div class="form-grid">
+
+          <div class="form-group">
+
+            <label for="companyId">
+              Entreprise *
+            </label>
+
+            <select
+              id="companyId"
+              formControlName="companyId"
+            >
+              <option [ngValue]="null">
+                Sélectionner une entreprise
+              </option>
+
+              <option
+                *ngFor="let company of companies"
+                [ngValue]="company.id"
+              >
+                {{ company.name }}
+              </option>
+            </select>
+
+            <small
+              *ngIf="
+                offerForm.controls.companyId.touched
+                &&
+                offerForm.controls.companyId.invalid
+              "
+              class="field-error"
+            >
+              L’entreprise est obligatoire.
+            </small>
+
+          </div>
+
+          <div class="form-group">
+
+            <label for="title">
+              Intitulé du poste *
+            </label>
+
+            <input
+              id="title"
+              type="text"
+              formControlName="title"
+              placeholder="Exemple : Développeur Angular"
+            >
+
+            <small
+              *ngIf="
+                offerForm.controls.title.touched
+                &&
+                offerForm.controls.title.invalid
+              "
+              class="field-error"
+            >
+              Le titre est obligatoire.
+            </small>
+
+          </div>
+
+          <div class="form-group">
+
+            <label for="location">
+              Localisation
+            </label>
+
+            <input
+              id="location"
+              type="text"
+              formControlName="location"
+              placeholder="Tunis, Tunisie"
+            >
+
+          </div>
+
+          <div class="form-group">
+
+            <label for="workMode">
+              Mode de travail *
+            </label>
+
+            <select
+              id="workMode"
+              formControlName="workMode"
+            >
+              <option
+                *ngFor="let mode of workModes"
+                [value]="mode.value"
+              >
+                {{ mode.label }}
+              </option>
+            </select>
+
+          </div>
+
+          <div class="form-group">
+
+            <label for="employmentType">
+              Type de contrat *
+            </label>
+
+            <select
+              id="employmentType"
+              formControlName="employmentType"
+            >
+              <option
+                *ngFor="let type of employmentTypes"
+                [value]="type.value"
+              >
+                {{ type.label }}
+              </option>
+            </select>
+
+          </div>
+
+          <div class="form-group">
+
+            <label for="deadline">
+              Date limite
+            </label>
+
+            <input
+              id="deadline"
+              type="date"
+              formControlName="deadline"
+            >
+
+          </div>
+
+          <div class="form-group">
+
+            <label for="salaryMin">
+              Salaire minimum
+            </label>
+
+            <input
+              id="salaryMin"
+              type="number"
+              min="0"
+              formControlName="salaryMin"
+              placeholder="1500"
+            >
+
+          </div>
+
+          <div class="form-group">
+
+            <label for="salaryMax">
+              Salaire maximum
+            </label>
+
+            <input
+              id="salaryMax"
+              type="number"
+              min="0"
+              formControlName="salaryMax"
+              placeholder="2500"
+            >
+
+          </div>
+
+          <div class="form-group">
+
+            <label for="currency">
+              Devise
+            </label>
+
+            <input
+              id="currency"
+              type="text"
+              formControlName="currency"
+              placeholder="TND"
+            >
+
+          </div>
+
+          <div class="form-group">
+
+            <label for="sourceUrl">
+              Lien de l’offre
+            </label>
+
+            <input
+              id="sourceUrl"
+              type="url"
+              formControlName="sourceUrl"
+              placeholder="https://..."
+            >
+
+          </div>
+
+        </div>
+
+        <div class="form-group">
+
+          <label for="description">
+            Description
+          </label>
+
+          <textarea
+            id="description"
+            rows="6"
+            formControlName="description"
+            placeholder="Description, missions et compétences demandées..."
+          ></textarea>
+
+        </div>
+
+        <div class="form-actions">
+
+          <button
+            type="button"
+            class="secondary-button"
+            [disabled]="saving"
+            (click)="cancelForm()"
+          >
+            Annuler
+          </button>
+
+          <button
+            type="submit"
+            class="primary-button"
+            [disabled]="saving"
+          >
+            {{
+              saving
+                ? 'Enregistrement...'
+                : editingId === null
+                  ? 'Ajouter l’offre'
+                  : 'Enregistrer les modifications'
+            }}
+          </button>
+
+        </div>
+
+      </form>
+
+    </section>
+
+    <section class="offers-panel">
+
+      <div class="panel-header">
+
+        <div>
+          <span class="page-kicker">
+            Répertoire
+          </span>
+
+          <h2>
+            Mes offres
+          </h2>
+        </div>
+
+        <span class="offer-count">
+          {{ filteredOffers.length }}
+        </span>
+
+      </div>
+
+      <div class="filters">
+
+        <input
+          type="search"
+          [(ngModel)]="searchTerm"
+          placeholder="Rechercher un poste ou une entreprise..."
+        >
+
+        <select
+          [(ngModel)]="selectedCompanyFilter"
+        >
+          <option [ngValue]="null">
+            Toutes les entreprises
+          </option>
+
+          <option
+            *ngFor="let company of companies"
+            [ngValue]="company.id"
+          >
+            {{ company.name }}
+          </option>
+        </select>
+
+      </div>
+
+      <div
+        *ngIf="loading"
+        class="loading-state"
+      >
+        <div class="spinner"></div>
+
+        <p>
+          Chargement des offres...
+        </p>
+      </div>
+
+      <div
+        *ngIf="
+          !loading
+          &&
+          filteredOffers.length === 0
+        "
+        class="empty-state"
+      >
+        <span>💼</span>
+
+        <h3>
+          Aucune offre trouvée
+        </h3>
+
+        <p>
+          Ajoutez une offre ou modifiez vos critères de recherche.
+        </p>
+      </div>
+
+      <div
+        *ngIf="
+          !loading
+          &&
+          filteredOffers.length > 0
+        "
+        class="offers-grid"
+      >
+
+        <article
+          *ngFor="
+            let offer of filteredOffers;
+            trackBy: trackByOfferId
+          "
+          class="offer-card"
+        >
+
+          <div class="offer-card-header">
+
+            <span class="company-logo">
+              {{
+                offer.companyName
+                  .charAt(0)
+                  .toUpperCase()
+              }}
+            </span>
+
+            <div class="offer-actions">
+
+              <button
+                type="button"
+                class="icon-button edit"
+                title="Modifier"
+                (click)="openEditForm(offer)"
+              >
+                ✎
+              </button>
+
+              <button
+                type="button"
+                class="icon-button delete"
+                title="Supprimer"
+                [disabled]="
+                  deletingId === offer.id
+                "
+                (click)="deleteOffer(offer)"
+              >
+                {{
+                  deletingId === offer.id
+                    ? '…'
+                    : '×'
+                }}
+              </button>
+
+            </div>
+
+          </div>
+
+          <div class="offer-content">
+
+            <span class="company-name">
+              {{ offer.companyName }}
+            </span>
+
+            <h3>
+              {{ offer.title }}
+            </h3>
+
+            <div class="badges">
+
+              <span class="badge">
+                {{ getWorkModeLabel(offer.workMode) }}
+              </span>
+
+              <span class="badge contract">
+                {{
+                  getEmploymentTypeLabel(
+                    offer.employmentType
+                  )
+                }}
+              </span>
+
+            </div>
+
+            <div class="offer-details">
+
+              <p>
+                📍
+                {{
+                  offer.location
+                    || 'Localisation non précisée'
+                }}
+              </p>
+
+              <p>
+                💰 {{ formatSalary(offer) }}
+              </p>
+
+              <p *ngIf="offer.deadline">
+                📅 Date limite :
+                {{
+                  offer.deadline
+                    | date:'dd/MM/yyyy'
+                }}
+              </p>
+
+            </div>
+
+            <p
+              *ngIf="offer.description"
+              class="offer-description"
+            >
+              {{ offer.description }}
+            </p>
+
+          </div>
+
+          <footer class="offer-footer">
+
+            <a
+              *ngIf="offer.sourceUrl"
+              [href]="offer.sourceUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Voir l’offre ↗
+            </a>
+
+            <span>
+              Ajoutée le
+              {{
+                offer.createdAt
+                  | date:'dd/MM/yyyy'
+              }}
+            </span>
+
+          </footer>
+
+        </article>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</div>

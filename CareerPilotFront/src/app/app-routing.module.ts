@@ -70,6 +70,21 @@ const routes: Routes = [
           module.CompaniesComponent
       )
   },
+  {
+  path: 'job-offers',
+
+  canActivate: [
+    authGuard
+  ],
+
+  loadComponent: () =>
+    import(
+      './features/job-offers/job-offers/job-offers.component'
+    ).then(
+      module =>
+        module.JobOffersComponent
+    )
+},
 
   {
     path: '',
