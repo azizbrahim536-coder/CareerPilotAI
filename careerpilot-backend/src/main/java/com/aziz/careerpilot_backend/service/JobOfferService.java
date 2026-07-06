@@ -7,6 +7,9 @@ import com.aziz.careerpilot_backend.entity.AppUser;
 import com.aziz.careerpilot_backend.entity.Company;
 import com.aziz.careerpilot_backend.entity.JobOffer;
 
+import com.aziz.careerpilot_backend.repository.JobApplicationRepository;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.aziz.careerpilot_backend.repository.JobOfferRepository;
 
 import org.springframework.http.HttpStatus;
@@ -19,7 +22,11 @@ import java.util.List;
 import java.util.Locale;
 
 @Service
+@Transactional
 public class JobOfferService {
+
+    private final JobApplicationRepository
+            jobApplicationRepository;
 
     private final JobOfferRepository
             jobOfferRepository;
@@ -28,13 +35,17 @@ public class JobOfferService {
 
     public JobOfferService(
             JobOfferRepository jobOfferRepository,
-            CompanyService companyService
+            CompanyService companyService,
+            JobApplicationRepository jobApplicationRepository
     ) {
         this.jobOfferRepository =
                 jobOfferRepository;
 
         this.companyService =
                 companyService;
+
+        this.jobApplicationRepository =
+                jobApplicationRepository;
     }
 
     public List<JobOfferResponse> getAll(
@@ -161,10 +172,25 @@ public class JobOfferService {
                         currentUser.getId()
                 );
 
+        boolean hasApplication =
+                jobApplicationRepository
+                        .existsByJobOfferIdAndOwnerId(
+                                id,
+                                currentUser.getId()
+                        );
+
+        if (hasApplication) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Impossible de supprimer cette offre car elle possède une candidature"
+            );
+        }
+
         jobOfferRepository.delete(offer);
     }
 
-    private JobOffer findOwnedOffer(
+    public JobOffer findOwnedOffer(
             Long id,
             Long ownerId
     ) {

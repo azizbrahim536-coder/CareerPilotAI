@@ -11,12 +11,13 @@ import com.aziz.careerpilot_backend.repository.JobOfferRepository;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
 @Service
+@Transactional
 public class CompanyService {
 
     private final CompanyRepository companyRepository;
