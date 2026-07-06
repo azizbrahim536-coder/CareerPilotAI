@@ -1,37 +1,97 @@
-<div class="dashboard-page">
+<div class="app-layout">
 
-  <header class="dashboard-header">
+  <aside class="sidebar">
 
-    <a
-      href="/dashboard"
-      class="dashboard-brand"
-    >
-      <span>
+    <div class="sidebar-brand">
+
+      <span class="brand-icon">
         C
       </span>
 
-      CareerPilot AI
-    </a>
-
-    <div class="header-user">
-
-      <div
-        *ngIf="user"
-        class="user-summary"
-      >
+      <div>
         <strong>
-          {{ user.firstName }}
-          {{ user.lastName }}
+          CareerPilot
         </strong>
 
         <small>
-          {{ user.email }}
+          AI Career Manager
         </small>
+      </div>
+
+    </div>
+
+    <nav class="sidebar-nav">
+
+      <button
+        type="button"
+        class="nav-item active"
+      >
+        <span>⌂</span>
+        Tableau de bord
+      </button>
+
+      <button
+        type="button"
+        class="nav-item"
+      >
+        <span>▦</span>
+        Kanban
+      </button>
+
+      <button
+        type="button"
+        class="nav-item"
+      >
+        <span>🏢</span>
+        Entreprises
+      </button>
+
+      <button
+        type="button"
+        class="nav-item"
+      >
+        <span>💼</span>
+        Offres d’emploi
+      </button>
+
+      <button
+        type="button"
+        class="nav-item"
+      >
+        <span>✦</span>
+        Assistant IA
+      </button>
+
+    </nav>
+
+    <div class="sidebar-footer">
+
+      <div class="sidebar-user">
+
+        <span class="user-avatar">
+          {{
+            user?.firstName
+              ?.charAt(0)
+              ?.toUpperCase()
+          }}
+        </span>
+
+        <div>
+          <strong>
+            {{ user?.firstName }}
+            {{ user?.lastName }}
+          </strong>
+
+          <small>
+            {{ user?.email }}
+          </small>
+        </div>
+
       </div>
 
       <button
         type="button"
-        class="logout-button"
+        class="sidebar-logout"
         (click)="logout()"
       >
         Déconnexion
@@ -39,72 +99,587 @@
 
     </div>
 
-  </header>
+  </aside>
 
-  <main class="dashboard-content">
+  <main class="main-content">
 
-    <div
-      *ngIf="loading"
-      class="dashboard-message"
-    >
-      Chargement de votre espace...
-    </div>
+    <header class="topbar">
+
+      <div>
+
+        <span class="page-kicker">
+          Vue d’ensemble
+        </span>
+
+        <h1>
+          Tableau de bord
+        </h1>
+
+      </div>
+
+      <button
+        type="button"
+        class="refresh-button"
+        [disabled]="loading"
+        (click)="loadDashboard()"
+      >
+        ↻ Actualiser
+      </button>
+
+    </header>
+
+    <section class="welcome-card">
+
+      <div>
+
+        <span class="welcome-label">
+          CareerPilot AI
+        </span>
+
+        <h2>
+          Bonjour {{ user?.firstName }} 👋
+        </h2>
+
+        <p>
+          Suivez vos candidatures,
+          entretiens et opportunités
+          depuis un seul espace.
+        </p>
+
+      </div>
+
+      <div class="welcome-illustration">
+        🚀
+      </div>
+
+    </section>
 
     <div
       *ngIf="errorMessage"
-      class="alert alert-error"
+      class="alert-error"
     >
-      {{ errorMessage }}
+
+      <span>
+        ⚠️ {{ errorMessage }}
+      </span>
+
+      <button
+        type="button"
+        (click)="loadDashboard()"
+      >
+        Réessayer
+      </button>
+
+    </div>
+
+    <div
+      *ngIf="loading"
+      class="dashboard-loading"
+    >
+
+      <div class="loading-spinner"></div>
+
+      <p>
+        Chargement de vos données...
+      </p>
+
     </div>
 
     <ng-container
       *ngIf="
         !loading
         &&
-        user
+        statistics as stats
       "
     >
 
-      <section class="welcome-panel">
+      <section class="statistics-grid">
 
-        <div>
+        <article class="stat-card">
 
-          <span class="eyebrow">
-            Tableau de bord
-          </span>
+          <div class="stat-top">
 
-          <h1>
-            Bonjour {{ user.firstName }} 👋
-          </h1>
+            <span class="stat-icon total">
+              📋
+            </span>
+
+            <span class="stat-change">
+              Total
+            </span>
+
+          </div>
+
+          <strong>
+            {{ stats.totalApplications }}
+          </strong>
 
           <p>
-            Votre compte est connecté et
-            protégé par JWT.
+            Candidatures
           </p>
 
-        </div>
+        </article>
 
-        <div class="role-badge">
-          {{ user.role }}
-        </div>
+        <article class="stat-card">
+
+          <div class="stat-top">
+
+            <span class="stat-icon active">
+              ⚡
+            </span>
+
+            <span class="stat-change">
+              En cours
+            </span>
+
+          </div>
+
+          <strong>
+            {{ stats.activeApplications }}
+          </strong>
+
+          <p>
+            Candidatures actives
+          </p>
+
+        </article>
+
+        <article class="stat-card">
+
+          <div class="stat-top">
+
+            <span class="stat-icon interview">
+              📅
+            </span>
+
+            <span class="stat-change">
+              Planifiés
+            </span>
+
+          </div>
+
+          <strong>
+            {{ stats.interviewApplications }}
+          </strong>
+
+          <p>
+            Entretiens
+          </p>
+
+        </article>
+
+        <article class="stat-card">
+
+          <div class="stat-top">
+
+            <span class="stat-icon offer">
+              🎉
+            </span>
+
+            <span class="stat-change">
+              Succès
+            </span>
+
+          </div>
+
+          <strong>
+            {{ stats.offerApplications }}
+          </strong>
+
+          <p>
+            Offres reçues
+          </p>
+
+        </article>
 
       </section>
 
-      <section class="empty-dashboard">
+      <section class="insights-grid">
 
-        <div class="empty-icon">
-          🚀
+        <article class="rate-card">
+
+          <div class="rate-header">
+
+            <div>
+
+              <span>
+                Performance
+              </span>
+
+              <h3>
+                Taux de réponse
+              </h3>
+
+            </div>
+
+            <strong>
+              {{
+                stats.responseRate
+                  | number:'1.0-2'
+              }}%
+            </strong>
+
+          </div>
+
+          <div class="progress-track">
+
+            <div
+              class="progress-value response"
+              [style.width.%]="
+                stats.responseRate
+              "
+            ></div>
+
+          </div>
+
+          <p>
+            Pourcentage des candidatures
+            ayant reçu une réponse.
+          </p>
+
+        </article>
+
+        <article class="rate-card">
+
+          <div class="rate-header">
+
+            <div>
+
+              <span>
+                Conversion
+              </span>
+
+              <h3>
+                Taux d’offres
+              </h3>
+
+            </div>
+
+            <strong>
+              {{
+                stats.offerRate
+                  | number:'1.0-2'
+              }}%
+            </strong>
+
+          </div>
+
+          <div class="progress-track">
+
+            <div
+              class="progress-value offer-rate"
+              [style.width.%]="
+                stats.offerRate
+              "
+            ></div>
+
+          </div>
+
+          <p>
+            Pourcentage des candidatures
+            transformées en offres.
+          </p>
+
+        </article>
+
+        <article class="month-card">
+
+          <span class="month-icon">
+            📈
+          </span>
+
+          <div>
+
+            <strong>
+              {{ stats.applicationsThisMonth }}
+            </strong>
+
+            <p>
+              Candidatures ajoutées
+              ce mois-ci
+            </p>
+
+          </div>
+
+        </article>
+
+      </section>
+
+      <section class="dashboard-sections">
+
+        <article class="panel">
+
+          <div class="panel-header">
+
+            <div>
+              <span class="panel-kicker">
+                Agenda
+              </span>
+
+              <h3>
+                Prochains entretiens
+              </h3>
+            </div>
+
+            <span class="panel-count">
+              {{
+                stats.upcomingInterviews.length
+              }}
+            </span>
+
+          </div>
+
+          <div
+            *ngIf="
+              stats.upcomingInterviews.length === 0
+            "
+            class="empty-state"
+          >
+            <span>📅</span>
+
+            <p>
+              Aucun entretien planifié.
+            </p>
+          </div>
+
+          <div
+            *ngFor="
+              let interview
+              of stats.upcomingInterviews
+            "
+            class="activity-item"
+          >
+
+            <div class="activity-date">
+
+              <strong>
+                {{
+                  interview.interviewDate
+                    | date:'dd'
+                }}
+              </strong>
+
+              <span>
+                {{
+                  interview.interviewDate
+                    | date:'MMM'
+                }}
+              </span>
+
+            </div>
+
+            <div class="activity-info">
+
+              <strong>
+                {{ interview.jobTitle }}
+              </strong>
+
+              <span>
+                {{ interview.companyName }}
+              </span>
+
+              <small>
+                {{
+                  interview.interviewDate
+                    | date:'dd/MM/yyyy HH:mm'
+                }}
+              </small>
+
+            </div>
+
+          </div>
+
+        </article>
+
+        <article class="panel">
+
+          <div class="panel-header">
+
+            <div>
+              <span class="panel-kicker">
+                Rappels
+              </span>
+
+              <h3>
+                Prochains suivis
+              </h3>
+            </div>
+
+            <span class="panel-count">
+              {{
+                stats.upcomingFollowUps.length
+              }}
+            </span>
+
+          </div>
+
+          <div
+            *ngIf="
+              stats.upcomingFollowUps.length === 0
+            "
+            class="empty-state"
+          >
+            <span>🔔</span>
+
+            <p>
+              Aucun suivi programmé.
+            </p>
+          </div>
+
+          <div
+            *ngFor="
+              let followUp
+              of stats.upcomingFollowUps
+            "
+            class="activity-item"
+          >
+
+            <div class="followup-icon">
+              🔔
+            </div>
+
+            <div class="activity-info">
+
+              <strong>
+                {{ followUp.jobTitle }}
+              </strong>
+
+              <span>
+                {{ followUp.companyName }}
+              </span>
+
+              <small>
+                Suivi le
+                {{
+                  followUp.nextFollowUpDate
+                    | date:'dd/MM/yyyy'
+                }}
+              </small>
+
+            </div>
+
+          </div>
+
+        </article>
+
+      </section>
+
+      <section class="panel recent-panel">
+
+        <div class="panel-header">
+
+          <div>
+            <span class="panel-kicker">
+              Activité
+            </span>
+
+            <h3>
+              Candidatures récentes
+            </h3>
+          </div>
+
+          <button
+            type="button"
+            class="text-button"
+          >
+            Voir tout →
+          </button>
+
         </div>
 
-        <h2>
-          Votre espace CareerPilot est prêt
-        </h2>
+        <div
+          *ngIf="
+            stats.recentApplications.length === 0
+          "
+          class="empty-state large"
+        >
+          <span>📂</span>
 
-        <p>
-          La prochaine étape ajoutera les
-          statistiques, entreprises, offres
-          et le tableau Kanban.
-        </p>
+          <h4>
+            Aucune candidature
+          </h4>
+
+          <p>
+            Ajoutez votre première
+            candidature pour commencer.
+          </p>
+        </div>
+
+        <div
+          *ngIf="
+            stats.recentApplications.length > 0
+          "
+          class="applications-table"
+        >
+
+          <div class="table-header">
+            <span>Poste</span>
+            <span>Entreprise</span>
+            <span>Statut</span>
+            <span>Dernière modification</span>
+          </div>
+
+          <div
+            *ngFor="
+              let application
+              of stats.recentApplications
+            "
+            class="table-row"
+          >
+
+            <div class="job-cell">
+
+              <span class="job-avatar">
+                {{
+                  application.companyName
+                    .charAt(0)
+                    .toUpperCase()
+                }}
+              </span>
+
+              <div>
+                <strong>
+                  {{ application.jobTitle }}
+                </strong>
+
+                <small>
+                  {{
+                    application.location
+                      || 'Localisation non précisée'
+                  }}
+                </small>
+              </div>
+
+            </div>
+
+            <span>
+              {{ application.companyName }}
+            </span>
+
+            <span
+              class="status-badge"
+              [ngClass]="
+                getStatusClass(
+                  application.status
+                )
+              "
+            >
+              {{
+                getStatusLabel(
+                  application.status
+                )
+              }}
+            </span>
+
+            <span>
+              {{
+                application.updatedAt
+                  | date:'dd/MM/yyyy HH:mm'
+              }}
+            </span>
+
+          </div>
+
+        </div>
 
       </section>
 
