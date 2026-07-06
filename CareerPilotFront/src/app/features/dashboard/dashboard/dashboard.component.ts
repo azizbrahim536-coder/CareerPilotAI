@@ -35,6 +35,10 @@ import {
 import {
   SessionService
 } from '../../../core/services/session.service';
+import {
+  RouterLink,
+  RouterLinkActive
+} from '@angular/router';
 
 @Component({
   selector: 'app-dashboard',
@@ -42,7 +46,9 @@ import {
   standalone: true,
 
   imports: [
-    CommonModule
+    CommonModule,
+      RouterLink,
+      RouterLinkActive
   ],
 
   templateUrl:

@@ -1,6 +1,4 @@
-import {
-  NgModule
-} from '@angular/core';
+import { NgModule } from '@angular/core';
 
 import {
   RouterModule,
@@ -19,11 +17,9 @@ const routes: Routes = [
 
   {
     path: 'login',
-
     canActivate: [
       guestGuard
     ],
-
     loadComponent: () =>
       import(
         './features/auth/login/login.component'
@@ -35,11 +31,9 @@ const routes: Routes = [
 
   {
     path: 'register',
-
     canActivate: [
       guestGuard
     ],
-
     loadComponent: () =>
       import(
         './features/auth/register/register.component'
@@ -51,17 +45,29 @@ const routes: Routes = [
 
   {
     path: 'dashboard',
-
     canActivate: [
       authGuard
     ],
-
     loadComponent: () =>
       import(
         './features/dashboard/dashboard/dashboard.component'
       ).then(
         module =>
           module.DashboardComponent
+      )
+  },
+
+  {
+    path: 'companies',
+    canActivate: [
+      authGuard
+    ],
+    loadComponent: () =>
+      import(
+        './features/companies/companies/companies.component'
+      ).then(
+        module =>
+          module.CompaniesComponent
       )
   },
 
@@ -81,7 +87,6 @@ const routes: Routes = [
   imports: [
     RouterModule.forRoot(routes)
   ],
-
   exports: [
     RouterModule
   ]

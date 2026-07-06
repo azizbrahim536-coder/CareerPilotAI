@@ -22,13 +22,14 @@
 
     <nav class="sidebar-nav">
 
-      <button
-        type="button"
-        class="nav-item active"
-      >
-        <span>⌂</span>
-        Tableau de bord
-      </button>
+      <a
+  routerLink="/dashboard"
+  routerLinkActive="active"
+  class="nav-item"
+>
+  <span>⌂</span>
+  Tableau de bord
+</a>
 
       <button
         type="button"
@@ -38,14 +39,14 @@
         Kanban
       </button>
 
-      <button
-        type="button"
-        class="nav-item"
-      >
-        <span>🏢</span>
-        Entreprises
-      </button>
-
+    <a
+  routerLink="/companies"
+  routerLinkActive="active"
+  class="nav-item"
+>
+  <span>🏢</span>
+  Entreprises
+</a>
       <button
         type="button"
         class="nav-item"

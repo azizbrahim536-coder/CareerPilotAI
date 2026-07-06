@@ -1,1 +1,522 @@
-<p>companies works!</p>
+<div class="app-layout">
+
+  <aside class="sidebar">
+
+    <div class="sidebar-brand">
+
+      <span class="brand-icon">
+        C
+      </span>
+
+      <div>
+        <strong>
+          CareerPilot
+        </strong>
+
+        <small>
+          AI Career Manager
+        </small>
+      </div>
+
+    </div>
+
+    <nav class="sidebar-nav">
+
+      <a
+        routerLink="/dashboard"
+        routerLinkActive="active"
+        class="nav-item"
+      >
+        <span>⌂</span>
+        Tableau de bord
+      </a>
+
+      <button
+        type="button"
+        class="nav-item"
+        disabled
+      >
+        <span>▦</span>
+        Kanban
+      </button>
+
+      <a
+        routerLink="/companies"
+        routerLinkActive="active"
+        class="nav-item"
+      >
+        <span>🏢</span>
+        Entreprises
+      </a>
+
+      <button
+        type="button"
+        class="nav-item"
+        disabled
+      >
+        <span>💼</span>
+        Offres d’emploi
+      </button>
+
+      <button
+        type="button"
+        class="nav-item"
+        disabled
+      >
+        <span>✦</span>
+        Assistant IA
+      </button>
+
+    </nav>
+
+    <div class="sidebar-footer">
+
+      <div class="sidebar-user">
+
+        <span class="user-avatar">
+          {{
+            user?.firstName
+              ?.charAt(0)
+              ?.toUpperCase()
+          }}
+        </span>
+
+        <div>
+          <strong>
+            {{ user?.firstName }}
+            {{ user?.lastName }}
+          </strong>
+
+          <small>
+            {{ user?.email }}
+          </small>
+        </div>
+
+      </div>
+
+      <button
+        type="button"
+        class="sidebar-logout"
+        (click)="logout()"
+      >
+        Déconnexion
+      </button>
+
+    </div>
+
+  </aside>
+
+  <main class="main-content">
+
+    <header class="topbar">
+
+      <div>
+
+        <span class="page-kicker">
+          Gestion
+        </span>
+
+        <h1>
+          Entreprises
+        </h1>
+
+        <p>
+          Gérez les entreprises associées
+          à vos offres et candidatures.
+        </p>
+
+      </div>
+
+      <button
+        type="button"
+        class="primary-button"
+        (click)="openCreateForm()"
+      >
+        + Nouvelle entreprise
+      </button>
+
+    </header>
+
+    <div
+      *ngIf="errorMessage"
+      class="alert alert-error"
+    >
+      <span>
+        ⚠️ {{ errorMessage }}
+      </span>
+
+      <button
+        type="button"
+        (click)="errorMessage = ''"
+      >
+        ×
+      </button>
+    </div>
+
+    <div
+      *ngIf="successMessage"
+      class="alert alert-success"
+    >
+      <span>
+        ✓ {{ successMessage }}
+      </span>
+
+      <button
+        type="button"
+        (click)="successMessage = ''"
+      >
+        ×
+      </button>
+    </div>
+
+    <section
+      *ngIf="showForm"
+      class="form-panel"
+    >
+
+      <div class="form-panel-header">
+
+        <div>
+
+          <span class="page-kicker">
+            {{
+              editingId === null
+                ? 'Création'
+                : 'Modification'
+            }}
+          </span>
+
+          <h2>
+            {{
+              editingId === null
+                ? 'Ajouter une entreprise'
+                : 'Modifier l’entreprise'
+            }}
+          </h2>
+
+        </div>
+
+        <button
+          type="button"
+          class="close-button"
+          (click)="cancelForm()"
+        >
+          ×
+        </button>
+
+      </div>
+
+      <form
+        [formGroup]="companyForm"
+        (ngSubmit)="submit()"
+      >
+
+        <div class="form-grid">
+
+          <div class="form-group">
+
+            <label for="companyName">
+              Nom de l’entreprise *
+            </label>
+
+            <input
+              id="companyName"
+              type="text"
+              formControlName="name"
+              placeholder="Exemple : BionomeeX"
+            >
+
+            <small
+              *ngIf="
+                companyForm.controls.name.touched
+                &&
+                companyForm.controls.name.invalid
+              "
+              class="field-error"
+            >
+              Le nom de l’entreprise est obligatoire.
+            </small>
+
+          </div>
+
+          <div class="form-group">
+
+            <label for="industry">
+              Secteur d’activité
+            </label>
+
+            <input
+              id="industry"
+              type="text"
+              formControlName="industry"
+              placeholder="Exemple : Intelligence artificielle"
+            >
+
+          </div>
+
+          <div class="form-group">
+
+            <label for="location">
+              Localisation
+            </label>
+
+            <input
+              id="location"
+              type="text"
+              formControlName="location"
+              placeholder="Exemple : Tunis, Tunisie"
+            >
+
+          </div>
+
+          <div class="form-group">
+
+            <label for="website">
+              Site web
+            </label>
+
+            <input
+              id="website"
+              type="url"
+              formControlName="website"
+              placeholder="https://example.com"
+            >
+
+          </div>
+
+        </div>
+
+        <div class="form-group">
+
+          <label for="notes">
+            Notes
+          </label>
+
+          <textarea
+            id="notes"
+            formControlName="notes"
+            rows="5"
+            placeholder="Ajoutez des informations sur cette entreprise..."
+          ></textarea>
+
+        </div>
+
+        <div class="form-actions">
+
+          <button
+            type="button"
+            class="secondary-button"
+            [disabled]="saving"
+            (click)="cancelForm()"
+          >
+            Annuler
+          </button>
+
+          <button
+            type="submit"
+            class="primary-button"
+            [disabled]="saving"
+          >
+            {{
+              saving
+                ? 'Enregistrement...'
+                : editingId === null
+                  ? 'Ajouter l’entreprise'
+                  : 'Enregistrer les modifications'
+            }}
+          </button>
+
+        </div>
+
+      </form>
+
+    </section>
+
+    <section class="companies-panel">
+
+      <div class="panel-header">
+
+        <div>
+
+          <span class="page-kicker">
+            Répertoire
+          </span>
+
+          <h2>
+            Mes entreprises
+          </h2>
+
+        </div>
+
+        <span class="company-count">
+          {{ companies.length }}
+        </span>
+
+      </div>
+
+      <div
+        *ngIf="loading"
+        class="loading-state"
+      >
+
+        <div class="spinner"></div>
+
+        <p>
+          Chargement des entreprises...
+        </p>
+
+      </div>
+
+      <div
+        *ngIf="
+          !loading
+          &&
+          companies.length === 0
+        "
+        class="empty-state"
+      >
+
+        <span class="empty-icon">
+          🏢
+        </span>
+
+        <h3>
+          Aucune entreprise
+        </h3>
+
+        <p>
+          Ajoutez votre première entreprise
+          pour commencer à enregistrer
+          des offres d’emploi.
+        </p>
+
+        <button
+          type="button"
+          class="primary-button"
+          (click)="openCreateForm()"
+        >
+          Ajouter une entreprise
+        </button>
+
+      </div>
+
+      <div
+        *ngIf="
+          !loading
+          &&
+          companies.length > 0
+        "
+        class="companies-grid"
+      >
+
+        <article
+          *ngFor="
+            let company of companies;
+            trackBy: trackByCompanyId
+          "
+          class="company-card"
+        >
+
+          <div class="company-card-header">
+
+            <span class="company-logo">
+              {{ getInitial(company) }}
+            </span>
+
+            <div class="company-actions">
+
+              <button
+                type="button"
+                class="icon-button edit"
+                title="Modifier"
+                (click)="openEditForm(company)"
+              >
+                ✎
+              </button>
+
+              <button
+                type="button"
+                class="icon-button delete"
+                title="Supprimer"
+                [disabled]="
+                  deletingId === company.id
+                "
+                (click)="deleteCompany(company)"
+              >
+                {{
+                  deletingId === company.id
+                    ? '…'
+                    : '×'
+                }}
+              </button>
+
+            </div>
+
+          </div>
+
+          <div class="company-content">
+
+            <h3>
+              {{ company.name }}
+            </h3>
+
+            <span
+              *ngIf="company.industry"
+              class="industry-badge"
+            >
+              {{ company.industry }}
+            </span>
+
+            <div class="company-details">
+
+              <p *ngIf="company.location">
+                <span>📍</span>
+                {{ company.location }}
+              </p>
+
+              <p *ngIf="company.website">
+
+                <span>🌐</span>
+
+                <a
+                  [href]="company.website"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Visiter le site
+                </a>
+
+              </p>
+
+            </div>
+
+            <p
+              *ngIf="company.notes"
+              class="company-notes"
+            >
+              {{ company.notes }}
+            </p>
+
+          </div>
+
+          <footer class="company-footer">
+
+            <span>
+              Ajoutée le
+              {{
+                company.createdAt
+                  | date:'dd/MM/yyyy'
+              }}
+            </span>
+
+          </footer>
+
+        </article>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</div>
