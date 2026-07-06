@@ -1,0 +1,115 @@
+<div class="dashboard-page">
+
+  <header class="dashboard-header">
+
+    <a
+      href="/dashboard"
+      class="dashboard-brand"
+    >
+      <span>
+        C
+      </span>
+
+      CareerPilot AI
+    </a>
+
+    <div class="header-user">
+
+      <div
+        *ngIf="user"
+        class="user-summary"
+      >
+        <strong>
+          {{ user.firstName }}
+          {{ user.lastName }}
+        </strong>
+
+        <small>
+          {{ user.email }}
+        </small>
+      </div>
+
+      <button
+        type="button"
+        class="logout-button"
+        (click)="logout()"
+      >
+        Déconnexion
+      </button>
+
+    </div>
+
+  </header>
+
+  <main class="dashboard-content">
+
+    <div
+      *ngIf="loading"
+      class="dashboard-message"
+    >
+      Chargement de votre espace...
+    </div>
+
+    <div
+      *ngIf="errorMessage"
+      class="alert alert-error"
+    >
+      {{ errorMessage }}
+    </div>
+
+    <ng-container
+      *ngIf="
+        !loading
+        &&
+        user
+      "
+    >
+
+      <section class="welcome-panel">
+
+        <div>
+
+          <span class="eyebrow">
+            Tableau de bord
+          </span>
+
+          <h1>
+            Bonjour {{ user.firstName }} 👋
+          </h1>
+
+          <p>
+            Votre compte est connecté et
+            protégé par JWT.
+          </p>
+
+        </div>
+
+        <div class="role-badge">
+          {{ user.role }}
+        </div>
+
+      </section>
+
+      <section class="empty-dashboard">
+
+        <div class="empty-icon">
+          🚀
+        </div>
+
+        <h2>
+          Votre espace CareerPilot est prêt
+        </h2>
+
+        <p>
+          La prochaine étape ajoutera les
+          statistiques, entreprises, offres
+          et le tableau Kanban.
+        </p>
+
+      </section>
+
+    </ng-container>
+
+  </main>
+
+</div>

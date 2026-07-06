@@ -1,0 +1,193 @@
+<div class="auth-page">
+
+  <section class="auth-presentation">
+
+    <a
+      routerLink="/"
+      class="brand"
+    >
+      <span class="brand-logo">
+        C
+      </span>
+
+      <span>
+        CareerPilot AI
+      </span>
+    </a>
+
+    <div class="presentation-content">
+
+      <span class="eyebrow">
+        Votre carrière, mieux organisée
+      </span>
+
+      <h1>
+        Transformez chaque candidature
+        en opportunité.
+      </h1>
+
+      <p>
+        Centralisez vos entreprises,
+        vos offres, vos entretiens et
+        votre progression professionnelle.
+      </p>
+
+      <div class="feature-list">
+
+        <div>
+          <span>✓</span>
+          Suivi Kanban des candidatures
+        </div>
+
+        <div>
+          <span>✓</span>
+          Statistiques personnalisées
+        </div>
+
+        <div>
+          <span>✓</span>
+          Conseils alimentés par l’IA
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <main class="auth-form-container">
+
+    <div class="auth-card">
+
+      <div class="auth-card-header">
+
+        <span class="mobile-logo">
+          C
+        </span>
+
+        <h2>
+          Bon retour parmi nous
+        </h2>
+
+        <p>
+          Connectez-vous à votre espace
+          CareerPilot.
+        </p>
+
+      </div>
+
+      <div
+        *ngIf="errorMessage"
+        class="alert alert-error"
+      >
+        {{ errorMessage }}
+      </div>
+
+      <form
+        [formGroup]="loginForm"
+        (ngSubmit)="submit()"
+      >
+
+        <div class="form-group">
+
+          <label for="email">
+            Adresse email
+          </label>
+
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            placeholder="nom@exemple.com"
+            autocomplete="email"
+          >
+
+          <small
+            *ngIf="
+              loginForm.controls.email.touched
+              &&
+              loginForm.controls.email.invalid
+            "
+            class="field-error"
+          >
+            Entrez une adresse email valide.
+          </small>
+
+        </div>
+
+        <div class="form-group">
+
+          <label for="password">
+            Mot de passe
+          </label>
+
+          <div class="password-field">
+
+            <input
+              id="password"
+              [type]="
+                showPassword
+                  ? 'text'
+                  : 'password'
+              "
+              formControlName="password"
+              placeholder="Votre mot de passe"
+              autocomplete="current-password"
+            >
+
+            <button
+              type="button"
+              class="password-toggle"
+              (click)="
+                showPassword = !showPassword
+              "
+            >
+              {{
+                showPassword
+                  ? 'Masquer'
+                  : 'Afficher'
+              }}
+            </button>
+
+          </div>
+
+          <small
+            *ngIf="
+              loginForm.controls.password.touched
+              &&
+              loginForm.controls.password.invalid
+            "
+            class="field-error"
+          >
+            Le mot de passe est obligatoire.
+          </small>
+
+        </div>
+
+        <button
+          type="submit"
+          class="primary-button"
+          [disabled]="loading"
+        >
+          {{
+            loading
+              ? 'Connexion en cours...'
+              : 'Se connecter'
+          }}
+        </button>
+
+      </form>
+
+      <p class="auth-switch">
+        Vous n’avez pas encore de compte ?
+
+        <a routerLink="/register">
+          Créer un compte
+        </a>
+      </p>
+
+    </div>
+
+  </main>
+
+</div>

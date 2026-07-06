@@ -1,0 +1,284 @@
+<div class="auth-page">
+
+  <section class="auth-presentation">
+
+    <a
+      routerLink="/"
+      class="brand"
+    >
+      <span class="brand-logo">
+        C
+      </span>
+
+      <span>
+        CareerPilot AI
+      </span>
+    </a>
+
+    <div class="presentation-content">
+
+      <span class="eyebrow">
+        Commencez votre parcours
+      </span>
+
+      <h1>
+        Organisez votre recherche
+        d’emploi avec confiance.
+      </h1>
+
+      <p>
+        Suivez toutes vos candidatures,
+        préparez vos entretiens et mesurez
+        votre progression.
+      </p>
+
+      <div class="feature-list">
+
+        <div>
+          <span>✓</span>
+          Toutes vos offres au même endroit
+        </div>
+
+        <div>
+          <span>✓</span>
+          Rappels de suivi et entretiens
+        </div>
+
+        <div>
+          <span>✓</span>
+          Assistant carrière intelligent
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <main class="auth-form-container">
+
+    <div class="auth-card register-card">
+
+      <div class="auth-card-header">
+
+        <span class="mobile-logo">
+          C
+        </span>
+
+        <h2>
+          Créer votre compte
+        </h2>
+
+        <p>
+          Rejoignez CareerPilot et commencez
+          à organiser vos candidatures.
+        </p>
+
+      </div>
+
+      <div
+        *ngIf="errorMessage"
+        class="alert alert-error"
+      >
+        {{ errorMessage }}
+      </div>
+
+      <form
+        [formGroup]="registerForm"
+        (ngSubmit)="submit()"
+      >
+
+        <div class="form-row">
+
+          <div class="form-group">
+
+            <label for="firstName">
+              Prénom
+            </label>
+
+            <input
+              id="firstName"
+              type="text"
+              formControlName="firstName"
+              placeholder="Mohamed Aziz"
+              autocomplete="given-name"
+            >
+
+            <small
+              *ngIf="
+                registerForm.controls.firstName.touched
+                &&
+                registerForm.controls.firstName.invalid
+              "
+              class="field-error"
+            >
+              Le prénom est obligatoire.
+            </small>
+
+          </div>
+
+          <div class="form-group">
+
+            <label for="lastName">
+              Nom
+            </label>
+
+            <input
+              id="lastName"
+              type="text"
+              formControlName="lastName"
+              placeholder="Brahim"
+              autocomplete="family-name"
+            >
+
+            <small
+              *ngIf="
+                registerForm.controls.lastName.touched
+                &&
+                registerForm.controls.lastName.invalid
+              "
+              class="field-error"
+            >
+              Le nom est obligatoire.
+            </small>
+
+          </div>
+
+        </div>
+
+        <div class="form-group">
+
+          <label for="email">
+            Adresse email
+          </label>
+
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            placeholder="nom@exemple.com"
+            autocomplete="email"
+          >
+
+          <small
+            *ngIf="
+              registerForm.controls.email.touched
+              &&
+              registerForm.controls.email.invalid
+            "
+            class="field-error"
+          >
+            Entrez une adresse email valide.
+          </small>
+
+        </div>
+
+        <div class="form-group">
+
+          <label for="password">
+            Mot de passe
+          </label>
+
+          <div class="password-field">
+
+            <input
+              id="password"
+              [type]="
+                showPassword
+                  ? 'text'
+                  : 'password'
+              "
+              formControlName="password"
+              placeholder="Minimum 8 caractères"
+              autocomplete="new-password"
+            >
+
+            <button
+              type="button"
+              class="password-toggle"
+              (click)="
+                showPassword = !showPassword
+              "
+            >
+              {{
+                showPassword
+                  ? 'Masquer'
+                  : 'Afficher'
+              }}
+            </button>
+
+          </div>
+
+          <small
+            *ngIf="
+              registerForm.controls.password.touched
+              &&
+              registerForm.controls.password.invalid
+            "
+            class="field-error"
+          >
+            Minimum 8 caractères.
+          </small>
+
+        </div>
+
+        <div class="form-group">
+
+          <label for="confirmPassword">
+            Confirmer le mot de passe
+          </label>
+
+          <input
+            id="confirmPassword"
+            [type]="
+              showPassword
+                ? 'text'
+                : 'password'
+            "
+            formControlName="confirmPassword"
+            placeholder="Confirmez le mot de passe"
+            autocomplete="new-password"
+          >
+
+          <small
+            *ngIf="
+              registerForm.controls.confirmPassword.touched
+              &&
+              registerForm.hasError(
+                'passwordsNotMatching'
+              )
+            "
+            class="field-error"
+          >
+            Les mots de passe ne correspondent pas.
+          </small>
+
+        </div>
+
+        <button
+          type="submit"
+          class="primary-button"
+          [disabled]="loading"
+        >
+          {{
+            loading
+              ? 'Création en cours...'
+              : 'Créer mon compte'
+          }}
+        </button>
+
+      </form>
+
+      <p class="auth-switch">
+        Vous avez déjà un compte ?
+
+        <a routerLink="/login">
+          Se connecter
+        </a>
+      </p>
+
+    </div>
+
+  </main>
+
+</div>
