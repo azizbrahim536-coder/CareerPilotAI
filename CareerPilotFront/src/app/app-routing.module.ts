@@ -107,6 +107,21 @@ const routes: Routes = [
         module.KanbanComponent
     )
 },
+{
+  path: 'ai-assistant',
+
+  canActivate: [
+    authGuard
+  ],
+
+  loadComponent: () =>
+    import(
+      './features/ai-assistant/ai-assistant/ai-assistant.component'
+    ).then(
+      module =>
+        module.AiAssistantComponent
+    )
+},
 
   {
     path: '**',

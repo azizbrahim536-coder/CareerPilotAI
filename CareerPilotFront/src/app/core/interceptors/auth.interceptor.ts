@@ -39,17 +39,39 @@ export const authInterceptor:
     const token =
       sessionService.getToken();
 
-    let authenticatedRequest =
+    const isSpringRequest =
+      request.url.startsWith(
+        environment.apiUrl
+      );
+
+    const isAiRequest =
+      request.url.startsWith(
+        environment.aiApiUrl
+      );
+
+    const isApiRequest =
+      isSpringRequest
+      ||
+      isAiRequest;
+
+    const isAuthenticationRequest =
+      request.url.includes(
+        '/auth/login'
+      )
+      ||
+      request.url.includes(
+        '/auth/register'
+      );
+
+    let securedRequest =
       request;
 
     if (
       token
       &&
-      request.url.startsWith(
-        environment.apiUrl
-      )
+      isApiRequest
     ) {
-      authenticatedRequest =
+      securedRequest =
         request.clone({
           setHeaders: {
             Authorization:
@@ -59,28 +81,24 @@ export const authInterceptor:
     }
 
     return next(
-      authenticatedRequest
+      securedRequest
     ).pipe(
+
       catchError(
         (
-          error: HttpErrorResponse
+          error:
+            HttpErrorResponse
         ) => {
-
-          const isAuthenticationRequest =
-            request.url.includes(
-              '/auth/login'
-            )
-            ||
-            request.url.includes(
-              '/auth/register'
-            );
 
           if (
             error.status === 401
             &&
+            isApiRequest
+            &&
             !isAuthenticationRequest
           ) {
-            sessionService.clearSession();
+            sessionService
+              .clearSession();
 
             router.navigate([
               '/login'

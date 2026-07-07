@@ -1,0 +1,1428 @@
+<div class="app-layout">
+
+  <aside class="sidebar">
+
+    <div class="sidebar-brand">
+
+      <span class="brand-icon">
+        C
+      </span>
+
+      <div>
+        <strong>
+          CareerPilot
+        </strong>
+
+        <small>
+          AI Career Manager
+        </small>
+      </div>
+
+    </div>
+
+    <nav class="sidebar-nav">
+
+      <a
+        routerLink="/dashboard"
+        routerLinkActive="active"
+        class="nav-item"
+      >
+        <span>⌂</span>
+        Tableau de bord
+      </a>
+
+      <a
+        routerLink="/kanban"
+        routerLinkActive="active"
+        class="nav-item"
+      >
+        <span>▦</span>
+        Kanban
+      </a>
+
+      <a
+        routerLink="/companies"
+        routerLinkActive="active"
+        class="nav-item"
+      >
+        <span>🏢</span>
+        Entreprises
+      </a>
+
+      <a
+        routerLink="/job-offers"
+        routerLinkActive="active"
+        class="nav-item"
+      >
+        <span>💼</span>
+        Offres d’emploi
+      </a>
+
+      <a
+        routerLink="/ai-assistant"
+        routerLinkActive="active"
+        class="nav-item"
+      >
+        <span>✦</span>
+        Assistant IA
+      </a>
+
+    </nav>
+
+    <div class="sidebar-footer">
+
+      <div class="sidebar-user">
+
+        <span class="user-avatar">
+          {{
+            user?.firstName
+              ?.charAt(0)
+              ?.toUpperCase()
+          }}
+        </span>
+
+        <div>
+
+          <strong>
+            {{ user?.firstName }}
+            {{ user?.lastName }}
+          </strong>
+
+          <small>
+            {{ user?.email }}
+          </small>
+
+        </div>
+
+      </div>
+
+      <button
+        type="button"
+        class="sidebar-logout"
+        (click)="logout()"
+      >
+        Déconnexion
+      </button>
+
+    </div>
+
+  </aside>
+
+
+  <main class="main-content">
+
+    <header class="topbar">
+
+      <div>
+
+        <span class="page-kicker">
+          Intelligence artificielle
+        </span>
+
+        <h1>
+          Assistant IA
+        </h1>
+
+        <p>
+          Préparez vos candidatures avec
+          l’aide de Gemini.
+        </p>
+
+      </div>
+
+      <div class="ai-badge">
+        <span>✦</span>
+        Propulsé par Gemini
+      </div>
+
+    </header>
+
+
+    <div
+      *ngIf="errorMessage"
+      class="alert alert-error"
+    >
+      <span>
+        ⚠️ {{ errorMessage }}
+      </span>
+
+      <button
+        type="button"
+        (click)="errorMessage = ''"
+      >
+        ×
+      </button>
+    </div>
+
+
+    <div
+      *ngIf="successMessage"
+      class="alert alert-success"
+    >
+      <span>
+        ✓ {{ successMessage }}
+      </span>
+
+      <button
+        type="button"
+        (click)="successMessage = ''"
+      >
+        ×
+      </button>
+    </div>
+
+
+    <div
+      *ngIf="copiedMessage"
+      class="alert alert-copy"
+    >
+      ✓ {{ copiedMessage }}
+    </div>
+
+
+    <div
+      *ngIf="loadingApplications"
+      class="loading-state"
+    >
+
+      <div class="spinner"></div>
+
+      <p>
+        Chargement des candidatures...
+      </p>
+
+    </div>
+
+
+    <section
+      *ngIf="
+        !loadingApplications
+        &&
+        applications.length === 0
+      "
+      class="empty-state"
+    >
+
+      <span>🤖</span>
+
+      <h2>
+        Aucune candidature disponible
+      </h2>
+
+      <p>
+        Créez d’abord une offre puis une
+        candidature dans le tableau Kanban.
+      </p>
+
+      <a
+        routerLink="/kanban"
+        class="primary-link"
+      >
+        Ouvrir le Kanban
+      </a>
+
+    </section>
+
+
+    <ng-container
+      *ngIf="
+        !loadingApplications
+        &&
+        applications.length > 0
+      "
+    >
+
+      <section class="ai-hero">
+
+        <div>
+
+          <span class="hero-label">
+            CareerPilot AI
+          </span>
+
+          <h2>
+            Accélérez votre recherche d’emploi
+          </h2>
+
+          <p>
+            Sélectionnez une candidature puis
+            choisissez l’outil adapté à votre besoin.
+          </p>
+
+        </div>
+
+        <div class="hero-icon">
+          ✨
+        </div>
+
+      </section>
+
+
+      <nav class="tabs">
+
+        <button
+          type="button"
+          [class.active]="
+            activeTab === 'cover-letter'
+          "
+          (click)="
+            setActiveTab(
+              'cover-letter'
+            )
+          "
+        >
+          <span>✉️</span>
+
+          <div>
+            <strong>
+              Lettre de motivation
+            </strong>
+
+            <small>
+              Génération personnalisée
+            </small>
+          </div>
+        </button>
+
+
+        <button
+          type="button"
+          [class.active]="
+            activeTab === 'interview'
+          "
+          (click)="
+            setActiveTab(
+              'interview'
+            )
+          "
+        >
+          <span>🎯</span>
+
+          <div>
+            <strong>
+              Préparation entretien
+            </strong>
+
+            <small>
+              Questions et conseils
+            </small>
+          </div>
+        </button>
+
+
+        <button
+          type="button"
+          [class.active]="
+            activeTab === 'match'
+          "
+          (click)="
+            setActiveTab(
+              'match'
+            )
+          "
+        >
+          <span>📊</span>
+
+          <div>
+            <strong>
+              Analyse CV / Offre
+            </strong>
+
+            <small>
+              Score de compatibilité
+            </small>
+          </div>
+        </button>
+
+      </nav>
+
+
+      <!-- LETTRE DE MOTIVATION -->
+
+     <!-- LETTRE DE MOTIVATION -->
+
+      <section
+        *ngIf="
+          activeTab === 'cover-letter'
+        "
+        class="workspace"
+      >
+
+        <article class="form-panel">
+
+          <div class="panel-header">
+
+            <div>
+              <span class="page-kicker">
+                Génération
+              </span>
+
+              <h2>
+                Lettre de motivation
+              </h2>
+            </div>
+
+            <span class="panel-icon">
+              ✉️
+            </span>
+
+          </div>
+
+          <form
+            [formGroup]="
+              coverLetterForm
+            "
+            (ngSubmit)="
+              generateCoverLetter()
+            "
+          >
+
+            <div class="form-group">
+
+              <label>
+                Candidature *
+              </label>
+
+              <select
+                formControlName="
+                  applicationId
+                "
+              >
+
+                <option
+                  [ngValue]="null"
+                >
+                  Sélectionner une candidature
+                </option>
+
+                <option
+                  *ngFor="
+                    let application
+                    of applications
+                  "
+                  [ngValue]="
+                    application.id
+                  "
+                >
+                  {{
+                    getApplicationLabel(
+                      application
+                    )
+                  }}
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div class="form-grid">
+
+              <div class="form-group">
+
+                <label>
+                  Langue
+                </label>
+
+                <select
+                  formControlName="
+                    language
+                  "
+                >
+
+                  <option
+                    *ngFor="
+                      let language
+                      of languages
+                    "
+                    [value]="
+                      language.value
+                    "
+                  >
+                    {{ language.label }}
+                  </option>
+
+                </select>
+
+              </div>
+
+
+              <div class="form-group">
+
+                <label>
+                  Ton
+                </label>
+
+                <select
+                  formControlName="
+                    tone
+                  "
+                >
+
+                  <option
+                    *ngFor="
+                      let tone
+                      of tones
+                    "
+                    [value]="tone.value"
+                  >
+                    {{ tone.label }}
+                  </option>
+
+                </select>
+
+              </div>
+
+            </div>
+
+
+           <div class="form-group">
+
+  <label for="coverCandidateSummary">
+    Présentation du candidat *
+  </label>
+
+  <textarea
+    id="coverCandidateSummary"
+    rows="8"
+    formControlName="candidateSummary"
+    placeholder="Exemple : Je suis diplômé en technologies de l’informatique. Je maîtrise Angular, Spring Boot, MySQL, Git..."
+  ></textarea>
+
+  <small
+    *ngIf="
+      coverLetterForm.controls.candidateSummary.touched
+      &&
+      coverLetterForm.controls.candidateSummary.hasError('required')
+    "
+    class="field-error"
+  >
+    La présentation du candidat est obligatoire.
+  </small>
+
+  <small
+    *ngIf="
+      coverLetterForm.controls.candidateSummary.touched
+      &&
+      coverLetterForm.controls.candidateSummary.hasError('minlength')
+    "
+    class="field-error"
+  >
+    Ajoutez au moins 30 caractères.
+  </small>
+
+  <small
+    *ngIf="
+      coverLetterForm.controls.candidateSummary.touched
+      &&
+      coverLetterForm.controls.candidateSummary.hasError('maxlength')
+    "
+    class="field-error"
+  >
+    La présentation ne doit pas dépasser 5000 caractères.
+  </small>
+
+  <div class="character-counter">
+    {{
+      coverLetterForm.controls.candidateSummary.value?.length || 0
+    }}
+    / 5000 caractères
+  </div>
+
+</div>
+
+
+            <button
+  type="submit"
+  class="generate-button"
+  [disabled]="
+    generating
+    ||
+    coverLetterForm.invalid
+  "
+>
+  {{
+    generating
+      ? 'Génération en cours...'
+      : '✦ Générer la lettre'
+  }}
+</button>
+
+          </form>
+
+        </article>
+
+
+        <article class="result-panel">
+
+          <div class="panel-header">
+
+            <div>
+              <span class="page-kicker">
+                Résultat
+              </span>
+
+              <h2>
+                Lettre générée
+              </h2>
+            </div>
+
+            <button
+              *ngIf="
+                coverLetterResult
+              "
+              type="button"
+              class="copy-button"
+              (click)="
+                copyText(
+                  coverLetterResult.full_letter,
+                  'Lettre copiée.'
+                )
+              "
+            >
+              Copier
+            </button>
+
+          </div>
+
+
+          <div
+            *ngIf="
+              !coverLetterResult
+              &&
+              !generating
+            "
+            class="result-placeholder"
+          >
+            <span>✉️</span>
+
+            <h3>
+              Votre lettre apparaîtra ici
+            </h3>
+
+            <p>
+              Complétez les informations
+              puis lancez la génération.
+            </p>
+          </div>
+
+
+          <div
+            *ngIf="generating"
+            class="generating-state"
+          >
+            <div class="spinner"></div>
+
+            <h3>
+              Gemini prépare votre lettre...
+            </h3>
+
+            <p>
+              Cette opération peut prendre
+              quelques secondes.
+            </p>
+          </div>
+
+
+          <div
+            *ngIf="
+              coverLetterResult
+              &&
+              !generating
+            "
+            class="letter-result"
+          >
+
+            <div class="letter-subject">
+              <strong>Objet :</strong>
+              {{ coverLetterResult.subject }}
+            </div>
+
+            <pre>{{
+              coverLetterResult.full_letter
+            }}</pre>
+
+          </div>
+
+        </article>
+
+      </section>
+
+
+      <!-- ENTRETIEN -->
+
+      <section
+        *ngIf="
+          activeTab === 'interview'
+        "
+        class="workspace"
+      >
+
+        <article class="form-panel">
+
+          <div class="panel-header">
+
+            <div>
+              <span class="page-kicker">
+                Coaching
+              </span>
+
+              <h2>
+                Préparation entretien
+              </h2>
+            </div>
+
+            <span class="panel-icon">
+              🎯
+            </span>
+
+          </div>
+
+
+          <form
+            [formGroup]="
+              interviewForm
+            "
+            (ngSubmit)="
+              generateInterviewPreparation()
+            "
+          >
+
+            <div class="form-group">
+
+              <label>
+                Candidature *
+              </label>
+
+              <select
+                formControlName="
+                  applicationId
+                "
+              >
+
+                <option
+                  [ngValue]="null"
+                >
+                  Sélectionner une candidature
+                </option>
+
+                <option
+                  *ngFor="
+                    let application
+                    of applications
+                  "
+                  [ngValue]="
+                    application.id
+                  "
+                >
+                  {{
+                    getApplicationLabel(
+                      application
+                    )
+                  }}
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div class="form-grid">
+
+              <div class="form-group">
+
+                <label>
+                  Langue
+                </label>
+
+                <select
+                  formControlName="
+                    language
+                  "
+                >
+
+                  <option
+                    *ngFor="
+                      let language
+                      of languages
+                    "
+                    [value]="
+                      language.value
+                    "
+                  >
+                    {{ language.label }}
+                  </option>
+
+                </select>
+
+              </div>
+
+
+              <div class="form-group">
+
+                <label>
+                  Nombre de questions
+                </label>
+
+                <input
+                  type="number"
+                  min="3"
+                  max="12"
+                  formControlName="
+                    questionCount
+                  "
+                >
+
+              </div>
+
+            </div>
+
+
+            <div class="form-group">
+
+              <label>
+                Présentation du candidat *
+              </label>
+
+              <textarea
+                rows="8"
+                formControlName="
+                  candidateSummary
+                "
+                placeholder="Décrivez votre formation, vos compétences et vos projets..."
+              ></textarea>
+
+            </div>
+
+
+            <button
+              type="submit"
+              class="generate-button"
+              [disabled]="generating"
+            >
+              {{
+                generating
+                  ? 'Préparation en cours...'
+                  : '✦ Préparer l’entretien'
+              }}
+            </button>
+
+          </form>
+
+        </article>
+
+
+        <article class="result-panel interview-results">
+
+          <div class="panel-header">
+
+            <div>
+              <span class="page-kicker">
+                Résultat
+              </span>
+
+              <h2>
+                Plan de préparation
+              </h2>
+            </div>
+
+          </div>
+
+
+          <div
+            *ngIf="
+              !interviewResult
+              &&
+              !generating
+            "
+            class="result-placeholder"
+          >
+            <span>🎯</span>
+
+            <h3>
+              Préparez votre entretien
+            </h3>
+
+            <p>
+              Gemini générera des questions
+              adaptées à l’offre.
+            </p>
+          </div>
+
+
+          <div
+            *ngIf="generating"
+            class="generating-state"
+          >
+            <div class="spinner"></div>
+
+            <h3>
+              Préparation des questions...
+            </h3>
+          </div>
+
+
+          <div
+            *ngIf="
+              interviewResult
+              &&
+              !generating
+            "
+            class="interview-content"
+          >
+
+            <p class="introduction">
+              {{ interviewResult.introduction }}
+            </p>
+
+
+            <article
+              *ngFor="
+                let item
+                of interviewResult.questions;
+                let index = index
+              "
+              class="question-card"
+            >
+
+              <div class="question-header">
+
+                <span class="question-number">
+                  {{ index + 1 }}
+                </span>
+
+                <div class="question-tags">
+
+                  <span>
+                    {{
+                      getCategoryLabel(
+                        item.category
+                      )
+                    }}
+                  </span>
+
+                  <span
+                    [class]="
+                      'difficulty '
+                      +
+                      item.difficulty
+                        .toLowerCase()
+                    "
+                  >
+                    {{
+                      getDifficultyLabel(
+                        item.difficulty
+                      )
+                    }}
+                  </span>
+
+                </div>
+
+              </div>
+
+              <h3>
+                {{ item.question }}
+              </h3>
+
+              <div class="answer-block">
+
+                <strong>
+                  Pourquoi cette question ?
+                </strong>
+
+                <p>
+                  {{ item.why_asked }}
+                </p>
+
+              </div>
+
+              <div class="answer-block">
+
+                <strong>
+                  Comment répondre ?
+                </strong>
+
+                <p>
+                  {{ item.answer_guidance }}
+                </p>
+
+              </div>
+
+              <div class="example-answer">
+
+                <strong>
+                  Exemple de réponse
+                </strong>
+
+                <p>
+                  {{ item.example_answer }}
+                </p>
+
+              </div>
+
+            </article>
+
+
+            <div class="lists-grid">
+
+              <div class="info-list">
+
+                <h3>
+                  Sujets à réviser
+                </h3>
+
+                <ul>
+                  <li
+                    *ngFor="
+                      let topic
+                      of interviewResult
+                        .technical_topics
+                    "
+                  >
+                    {{ topic }}
+                  </li>
+                </ul>
+
+              </div>
+
+
+              <div class="info-list">
+
+                <h3>
+                  Questions au recruteur
+                </h3>
+
+                <ul>
+                  <li
+                    *ngFor="
+                      let question
+                      of interviewResult
+                        .questions_to_ask_recruiter
+                    "
+                  >
+                    {{ question }}
+                  </li>
+                </ul>
+
+              </div>
+
+
+              <div class="info-list">
+
+                <h3>
+                  Checklist
+                </h3>
+
+                <ul>
+                  <li
+                    *ngFor="
+                      let step
+                      of interviewResult
+                        .preparation_checklist
+                    "
+                  >
+                    {{ step }}
+                  </li>
+                </ul>
+
+              </div>
+
+            </div>
+
+
+            <div class="final-advice">
+
+              <strong>
+                Conseil final
+              </strong>
+
+              <p>
+                {{ interviewResult.final_advice }}
+              </p>
+
+            </div>
+
+          </div>
+
+        </article>
+
+      </section>
+
+
+      <!-- MATCH ANALYSIS -->
+
+      <section
+        *ngIf="
+          activeTab === 'match'
+        "
+        class="workspace"
+      >
+
+        <article class="form-panel">
+
+          <div class="panel-header">
+
+            <div>
+              <span class="page-kicker">
+                Compatibilité ATS
+              </span>
+
+              <h2>
+                Analyse CV / Offre
+              </h2>
+            </div>
+
+            <span class="panel-icon">
+              📊
+            </span>
+
+          </div>
+
+
+          <form
+            [formGroup]="matchForm"
+            (ngSubmit)="
+              generateMatchAnalysis()
+            "
+          >
+
+            <div class="form-group">
+
+              <label>
+                Candidature *
+              </label>
+
+              <select
+                formControlName="
+                  applicationId
+                "
+              >
+
+                <option
+                  [ngValue]="null"
+                >
+                  Sélectionner une candidature
+                </option>
+
+                <option
+                  *ngFor="
+                    let application
+                    of applications
+                  "
+                  [ngValue]="
+                    application.id
+                  "
+                >
+                  {{
+                    getApplicationLabel(
+                      application
+                    )
+                  }}
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+              <label>
+                Langue du résultat
+              </label>
+
+              <select
+                formControlName="
+                  language
+                "
+              >
+
+                <option
+                  *ngFor="
+                    let language
+                    of languages
+                  "
+                  [value]="language.value"
+                >
+                  {{ language.label }}
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+              <label>
+                Contenu du CV *
+              </label>
+
+              <textarea
+                rows="17"
+                formControlName="cvText"
+                placeholder="Collez ici le contenu texte de votre CV..."
+              ></textarea>
+
+              <small
+                *ngIf="
+                  matchForm
+                    .controls
+                    .cvText
+                    .touched
+                  &&
+                  matchForm
+                    .controls
+                    .cvText
+                    .invalid
+                "
+                class="field-error"
+              >
+                Le CV doit contenir au moins
+                50 caractères.
+              </small>
+
+            </div>
+
+
+            <button
+              type="submit"
+              class="generate-button"
+              [disabled]="generating"
+            >
+              {{
+                generating
+                  ? 'Analyse en cours...'
+                  : '✦ Analyser la compatibilité'
+              }}
+            </button>
+
+          </form>
+
+        </article>
+
+
+        <article class="result-panel">
+
+          <div class="panel-header">
+
+            <div>
+              <span class="page-kicker">
+                Résultat
+              </span>
+
+              <h2>
+                Rapport de compatibilité
+              </h2>
+            </div>
+
+          </div>
+
+
+          <div
+            *ngIf="
+              !matchResult
+              &&
+              !generating
+            "
+            class="result-placeholder"
+          >
+            <span>📊</span>
+
+            <h3>
+              Votre score apparaîtra ici
+            </h3>
+
+            <p>
+              Collez votre CV puis lancez
+              l’analyse.
+            </p>
+          </div>
+
+
+          <div
+            *ngIf="generating"
+            class="generating-state"
+          >
+            <div class="spinner"></div>
+
+            <h3>
+              Analyse du CV en cours...
+            </h3>
+          </div>
+
+
+          <div
+            *ngIf="
+              matchResult
+              &&
+              !generating
+            "
+            class="match-content"
+          >
+
+            <div class="score-card">
+
+              <div
+                class="score-circle"
+                [style.--score]="
+                  matchResult.score
+                "
+              >
+                <strong>
+                  {{ matchResult.score }}
+                </strong>
+
+                <span>
+                  / 100
+                </span>
+              </div>
+
+              <div>
+
+                <span class="score-label">
+                  Compatibilité
+                </span>
+
+                <h3>
+                  {{
+                    getCompatibilityLabel(
+                      matchResult
+                        .compatibility_level
+                    )
+                  }}
+                </h3>
+
+                <p>
+                  {{ matchResult.summary }}
+                </p>
+
+              </div>
+
+            </div>
+
+
+            <div class="analysis-grid">
+
+              <div class="analysis-block strengths">
+
+                <h3>
+                  ✓ Points forts
+                </h3>
+
+                <ul>
+                  <li
+                    *ngFor="
+                      let strength
+                      of matchResult.strengths
+                    "
+                  >
+                    {{ strength }}
+                  </li>
+                </ul>
+
+              </div>
+
+
+              <div class="analysis-block gaps">
+
+                <h3>
+                  ⚠ Écarts identifiés
+                </h3>
+
+                <ul>
+                  <li
+                    *ngFor="
+                      let gap
+                      of matchResult.gaps
+                    "
+                  >
+                    {{ gap }}
+                  </li>
+                </ul>
+
+              </div>
+
+
+              <div class="analysis-block keywords">
+
+                <h3>
+                  Mots-clés manquants
+                </h3>
+
+                <div class="keyword-list">
+
+                  <span
+                    *ngFor="
+                      let keyword
+                      of matchResult
+                        .missing_keywords
+                    "
+                  >
+                    {{ keyword }}
+                  </span>
+
+                </div>
+
+              </div>
+
+
+              <div class="analysis-block">
+
+                <h3>
+                  Améliorations du CV
+                </h3>
+
+                <ul>
+                  <li
+                    *ngFor="
+                      let improvement
+                      of matchResult
+                        .cv_improvements
+                    "
+                  >
+                    {{ improvement }}
+                  </li>
+                </ul>
+
+              </div>
+
+
+              <div class="analysis-block full">
+
+                <h3>
+                  Recommandations
+                </h3>
+
+                <ul>
+                  <li
+                    *ngFor="
+                      let recommendation
+                      of matchResult
+                        .application_recommendations
+                    "
+                  >
+                    {{ recommendation }}
+                  </li>
+                </ul>
+
+              </div>
+
+            </div>
+
+
+            <p class="disclaimer">
+              {{ matchResult.disclaimer }}
+            </p>
+
+          </div>
+
+        </article>
+
+      </section>
+
+    </ng-container>
+
+  </main>
+
+</div>
