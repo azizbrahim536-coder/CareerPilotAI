@@ -93,6 +93,22 @@ const routes: Routes = [
   },
 
   {
+  path: 'kanban',
+
+  canActivate: [
+    authGuard
+  ],
+
+  loadComponent: () =>
+    import(
+      './features/kanban/kanban/kanban.component'
+    ).then(
+      module =>
+        module.KanbanComponent
+    )
+},
+
+  {
     path: '**',
     redirectTo: 'dashboard'
   }

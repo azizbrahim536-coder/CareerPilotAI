@@ -1,0 +1,801 @@
+<div class="app-layout">
+
+  <aside class="sidebar">
+
+    <div class="sidebar-brand">
+
+      <span class="brand-icon">
+        C
+      </span>
+
+      <div>
+        <strong>CareerPilot</strong>
+        <small>AI Career Manager</small>
+      </div>
+
+    </div>
+
+    <nav class="sidebar-nav">
+
+      <a
+        routerLink="/dashboard"
+        routerLinkActive="active"
+        class="nav-item"
+      >
+        <span>⌂</span>
+        Tableau de bord
+      </a>
+
+      <a
+        routerLink="/kanban"
+        routerLinkActive="active"
+        class="nav-item"
+      >
+        <span>▦</span>
+        Kanban
+      </a>
+
+      <a
+        routerLink="/companies"
+        routerLinkActive="active"
+        class="nav-item"
+      >
+        <span>🏢</span>
+        Entreprises
+      </a>
+
+      <a
+        routerLink="/job-offers"
+        routerLinkActive="active"
+        class="nav-item"
+      >
+        <span>💼</span>
+        Offres d’emploi
+      </a>
+
+      <button
+        type="button"
+        class="nav-item"
+        disabled
+      >
+        <span>✦</span>
+        Assistant IA
+      </button>
+
+    </nav>
+
+    <div class="sidebar-footer">
+
+      <div class="sidebar-user">
+
+        <span class="user-avatar">
+          {{
+            user?.firstName
+              ?.charAt(0)
+              ?.toUpperCase()
+          }}
+        </span>
+
+        <div>
+
+          <strong>
+            {{ user?.firstName }}
+            {{ user?.lastName }}
+          </strong>
+
+          <small>
+            {{ user?.email }}
+          </small>
+
+        </div>
+
+      </div>
+
+      <button
+        type="button"
+        class="sidebar-logout"
+        (click)="logout()"
+      >
+        Déconnexion
+      </button>
+
+    </div>
+
+  </aside>
+
+  <main class="main-content">
+
+    <header class="topbar">
+
+      <div>
+
+        <span class="page-kicker">
+          Suivi des candidatures
+        </span>
+
+        <h1>
+          Tableau Kanban
+        </h1>
+
+        <p>
+          Déplacez les candidatures entre les colonnes
+          pour mettre à jour leur statut.
+        </p>
+
+      </div>
+
+      <div class="topbar-actions">
+
+        <button
+          type="button"
+          class="secondary-button"
+          [disabled]="refreshing"
+          (click)="refreshBoard()"
+        >
+          {{
+            refreshing
+              ? 'Actualisation...'
+              : '↻ Actualiser'
+          }}
+        </button>
+
+        <button
+          type="button"
+          class="primary-button"
+          [disabled]="
+            offers.length === 0
+            ||
+            selectableOffers.length === 0
+          "
+          (click)="openCreateForm()"
+        >
+          + Nouvelle candidature
+        </button>
+
+      </div>
+
+    </header>
+
+    <div
+      *ngIf="
+        !loading
+        &&
+        offers.length === 0
+      "
+      class="alert alert-warning"
+    >
+
+      <span>
+        ⚠️ Vous devez ajouter une offre d’emploi
+        avant de créer une candidature.
+      </span>
+
+      <a routerLink="/job-offers">
+        Ajouter une offre
+      </a>
+
+    </div>
+
+    <div
+      *ngIf="errorMessage"
+      class="alert alert-error"
+    >
+
+      <span>
+        ⚠️ {{ errorMessage }}
+      </span>
+
+      <button
+        type="button"
+        (click)="errorMessage = ''"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <div
+      *ngIf="successMessage"
+      class="alert alert-success"
+    >
+
+      <span>
+        ✓ {{ successMessage }}
+      </span>
+
+      <button
+        type="button"
+        (click)="successMessage = ''"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <section
+      *ngIf="showForm"
+      class="form-panel"
+    >
+
+      <div class="form-panel-header">
+
+        <div>
+
+          <span class="page-kicker">
+            {{
+              editingApplication
+                ? 'Modification'
+                : 'Création'
+            }}
+          </span>
+
+          <h2>
+            {{
+              editingApplication
+                ? 'Modifier la candidature'
+                : 'Ajouter une candidature'
+            }}
+          </h2>
+
+        </div>
+
+        <button
+          type="button"
+          class="close-button"
+          (click)="cancelForm()"
+        >
+          ×
+        </button>
+
+      </div>
+
+      <form
+        [formGroup]="applicationForm"
+        (ngSubmit)="submit()"
+      >
+
+        <div class="form-grid">
+
+          <div class="form-group">
+
+            <label for="jobOfferId">
+              Offre d’emploi *
+            </label>
+
+            <select
+              id="jobOfferId"
+              formControlName="jobOfferId"
+            >
+
+              <option [ngValue]="null">
+                Sélectionner une offre
+              </option>
+
+              <option
+                *ngFor="
+                  let offer
+                  of selectableOffers
+                "
+                [ngValue]="offer.id"
+              >
+                {{ offer.title }}
+                — {{ offer.companyName }}
+              </option>
+
+            </select>
+
+            <small
+              *ngIf="
+                applicationForm
+                  .controls
+                  .jobOfferId
+                  .touched
+                &&
+                applicationForm
+                  .controls
+                  .jobOfferId
+                  .invalid
+              "
+              class="field-error"
+            >
+              L’offre est obligatoire.
+            </small>
+
+          </div>
+
+          <div class="form-group">
+
+            <label for="status">
+              Statut *
+            </label>
+
+            <select
+              id="status"
+              formControlName="status"
+            >
+
+              <option
+                *ngFor="let column of columns"
+                [value]="column.status"
+              >
+                {{ column.label }}
+              </option>
+
+            </select>
+
+          </div>
+
+          <div class="form-group">
+
+            <label for="appliedDate">
+              Date de candidature
+            </label>
+
+            <input
+              id="appliedDate"
+              type="date"
+              formControlName="appliedDate"
+            >
+
+          </div>
+
+          <div class="form-group">
+
+            <label for="interviewDate">
+              Date de l’entretien
+            </label>
+
+            <input
+              id="interviewDate"
+              type="datetime-local"
+              formControlName="interviewDate"
+            >
+
+          </div>
+
+          <div class="form-group">
+
+            <label for="nextFollowUpDate">
+              Date du prochain suivi
+            </label>
+
+            <input
+              id="nextFollowUpDate"
+              type="date"
+              formControlName="nextFollowUpDate"
+            >
+
+          </div>
+
+          <div class="form-group">
+
+            <label for="contactName">
+              Nom du contact
+            </label>
+
+            <input
+              id="contactName"
+              type="text"
+              formControlName="contactName"
+              placeholder="Nom du recruteur"
+            >
+
+          </div>
+
+          <div class="form-group">
+
+            <label for="contactEmail">
+              Email du contact
+            </label>
+
+            <input
+              id="contactEmail"
+              type="email"
+              formControlName="contactEmail"
+              placeholder="recruteur@entreprise.com"
+            >
+
+            <small
+              *ngIf="
+                applicationForm
+                  .controls
+                  .contactEmail
+                  .touched
+                &&
+                applicationForm
+                  .controls
+                  .contactEmail
+                  .invalid
+              "
+              class="field-error"
+            >
+              L’adresse email est invalide.
+            </small>
+
+          </div>
+
+          <div class="form-group">
+
+            <label for="contactPhone">
+              Téléphone du contact
+            </label>
+
+            <input
+              id="contactPhone"
+              type="text"
+              formControlName="contactPhone"
+              placeholder="+216 ..."
+            >
+
+          </div>
+
+        </div>
+
+        <div class="form-group">
+
+          <label for="notes">
+            Notes
+          </label>
+
+          <textarea
+            id="notes"
+            rows="5"
+            formControlName="notes"
+            placeholder="Préparation, remarques, informations importantes..."
+          ></textarea>
+
+        </div>
+
+        <div class="form-actions">
+
+          <button
+            type="button"
+            class="secondary-button"
+            [disabled]="saving"
+            (click)="cancelForm()"
+          >
+            Annuler
+          </button>
+
+          <button
+            type="submit"
+            class="primary-button"
+            [disabled]="saving"
+          >
+            {{
+              saving
+                ? 'Enregistrement...'
+                : editingApplication
+                  ? 'Enregistrer les modifications'
+                  : 'Ajouter la candidature'
+            }}
+          </button>
+
+        </div>
+
+      </form>
+
+    </section>
+
+    <div
+      *ngIf="loading"
+      class="loading-state"
+    >
+
+      <div class="spinner"></div>
+
+      <p>
+        Chargement du tableau Kanban...
+      </p>
+
+    </div>
+
+    <section
+      *ngIf="!loading"
+      class="kanban-summary"
+    >
+
+      <div>
+        <strong>
+          {{ totalApplications }}
+        </strong>
+
+        <span>
+          candidature(s)
+        </span>
+      </div>
+
+      <p>
+        Glissez une carte vers une autre colonne
+        pour changer son statut.
+      </p>
+
+    </section>
+
+    <div
+      *ngIf="!loading"
+      class="kanban-board"
+      cdkDropListGroup
+    >
+
+      <section
+        *ngFor="let column of columns"
+        class="kanban-column"
+        [ngClass]="column.className"
+      >
+
+        <header class="column-header">
+
+          <div class="column-title">
+
+            <span class="column-icon">
+              {{ column.icon }}
+            </span>
+
+            <div>
+              <h2>
+                {{ column.label }}
+              </h2>
+
+              <p>
+                {{ column.description }}
+              </p>
+            </div>
+
+          </div>
+
+          <span class="column-count">
+            {{
+              getColumnCount(
+                column.status
+              )
+            }}
+          </span>
+
+        </header>
+
+        <div
+          class="column-body"
+          cdkDropList
+          [cdkDropListData]="
+            getColumnApplications(
+              column.status
+            )
+          "
+          (cdkDropListDropped)="
+            drop(
+              $event,
+              column.status
+            )
+          "
+        >
+
+          <article
+            *ngFor="
+              let application
+              of getColumnApplications(
+                column.status
+              );
+              trackBy: trackByApplicationId
+            "
+            class="application-card"
+            cdkDrag
+            [cdkDragData]="application"
+            [class.updating]="
+              updatingStatusId
+              ===
+              application.id
+            "
+          >
+
+            <div class="drag-placeholder"
+                 *cdkDragPlaceholder>
+            </div>
+
+            <div class="card-header">
+
+              <span class="company-avatar">
+                {{
+                  application
+                    .companyName
+                    .charAt(0)
+                    .toUpperCase()
+                }}
+              </span>
+
+              <button
+                type="button"
+                class="drag-handle"
+                cdkDragHandle
+                title="Déplacer"
+              >
+                ⋮⋮
+              </button>
+
+            </div>
+
+            <div class="card-content">
+
+              <span class="company-name">
+                {{ application.companyName }}
+              </span>
+
+              <h3>
+                {{ application.jobTitle }}
+              </h3>
+
+              <p class="job-location">
+                📍
+                {{
+                  application.jobLocation
+                  ||
+                  'Localisation non précisée'
+                }}
+              </p>
+
+              <div class="card-dates">
+
+                <span
+                  *ngIf="
+                    application.appliedDate
+                  "
+                >
+                  📤
+                  {{
+                    application.appliedDate
+                      | date:'dd/MM/yyyy'
+                  }}
+                </span>
+
+                <span
+                  *ngIf="
+                    application.interviewDate
+                  "
+                >
+                  📅
+                  {{
+                    application.interviewDate
+                      | date:'dd/MM/yyyy HH:mm'
+                  }}
+                </span>
+
+                <span
+                  *ngIf="
+                    application.nextFollowUpDate
+                  "
+                >
+                  🔔
+                  {{
+                    application.nextFollowUpDate
+                      | date:'dd/MM/yyyy'
+                  }}
+                </span>
+
+              </div>
+
+              <p
+                *ngIf="application.notes"
+                class="application-notes"
+              >
+                {{ application.notes }}
+              </p>
+
+            </div>
+
+            <div class="status-selector">
+
+              <label>
+                Statut
+              </label>
+
+              <select
+                [ngModel]="application.status"
+                [disabled]="
+                  updatingStatusId
+                  ===
+                  application.id
+                "
+                (ngModelChange)="
+                  changeStatus(
+                    application,
+                    $event
+                  )
+                "
+              >
+
+                <option
+                  *ngFor="let statusColumn of columns"
+                  [value]="statusColumn.status"
+                >
+                  {{ statusColumn.label }}
+                </option>
+
+              </select>
+
+            </div>
+
+            <footer class="card-footer">
+
+              <button
+                type="button"
+                class="edit-button"
+                (click)="
+                  openEditForm(
+                    application
+                  )
+                "
+              >
+                ✎ Modifier
+              </button>
+
+              <button
+                type="button"
+                class="delete-button"
+                [disabled]="
+                  deletingId
+                  ===
+                  application.id
+                "
+                (click)="
+                  deleteApplication(
+                    application
+                  )
+                "
+              >
+                {{
+                  deletingId
+                  ===
+                  application.id
+                    ? 'Suppression...'
+                    : 'Supprimer'
+                }}
+              </button>
+
+            </footer>
+
+          </article>
+
+          <div
+            *ngIf="
+              getColumnCount(
+                column.status
+              ) === 0
+            "
+            class="empty-column"
+          >
+
+            <span>
+              {{ column.icon }}
+            </span>
+
+            <p>
+              Aucune candidature
+            </p>
+
+            <button
+              type="button"
+              [disabled]="
+                offers.length === 0
+                ||
+                selectableOffers.length === 0
+              "
+              (click)="
+                openCreateForm(
+                  column.status
+                )
+              "
+            >
+              + Ajouter
+            </button>
+
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
+
+  </main>
+
+</div>
